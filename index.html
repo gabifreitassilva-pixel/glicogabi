@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlicoGabi V35</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --roxo: #7d5fff; --vermelho: #ff4d4d; --verde: #2ecc71; --amarelo: #ffb142; --lilas: #f3f0ff; --cinza: #95a5a6; }
+        body { font-family: sans-serif; background: #2d3436; display: flex; justify-content: center; margin: 0; padding: 5px; }
+        .app-shell { width: 360px; height: 780px; background: white; border-radius: 40px; overflow: hidden; display: flex; flex-direction: column; border: 8px solid #1e272e; position: relative; }
+
+        .header { background: var(--roxo); color: white; padding: 40px 20px; text-align: center; flex-shrink: 0; }
+        .header i { font-size: 45px; margin-bottom: 12px; }
+        .header h1 { margin: 0; font-size: 32px; font-weight: bold; }
+        .header p { margin: 8px 0 0; font-size: 16px; opacity: 0.9; }
+
+        .tab-content { flex-grow: 1; overflow-y: auto; display: none; padding-bottom: 80px; }
+        .tab-active { display: block; }
+
+        .med-section { padding: 15px; display: flex; justify-content: space-around; gap: 8px; }
+        .med-card { border: 1px solid #eee; border-radius: 15px; padding: 10px; flex: 1; text-align: center; font-size: 11px; background: white; }
+        .med-card i { color: var(--roxo); display: block; margin-bottom: 5px; font-size: 20px; }
+
+        .input-box { background: var(--lilas); margin: 0 15px 15px; padding: 20px; border-radius: 25px; display: flex; flex-direction: column; align-items: center; }
+        input, select { width: 100%; max-width: 280px; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 12px; font-size: 14px; box-sizing: border-box; }
+        .btn-save { background: var(--roxo); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; max-width: 280px; font-weight: bold; cursor: pointer; }
+
+        .card { border: 1px solid #efefef; border-radius: 18px; padding: 18px; margin: 10px 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.03); position: relative; }
+        .val-num { font-size: 24px; font-weight: bold; }
+        .ev-row { font-size: 11px; border-top: 1px dashed #eee; padding: 8px 0; display: flex; flex-direction: column; position: relative; }
+        
+        .actions-btn { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
+        .btn-icon { border: none; background: none; cursor: pointer; font-size: 14px; opacity: 0.7; }
+
+        .hist-card { border: 1px solid #eee; border-radius: 15px; padding: 20px; margin: 15px 25px; border-left: 5px solid var(--roxo); position: relative; }
+
+        .config-group { padding: 0 20px; }
+        .config-label { font-size: 12px; font-weight: bold; color: var(--roxo); margin-top: 10px; display: block; }
+        .time-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .btn-zap { background: #2ecc71; color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+
+        #report-screen { padding: 15px; font-size: 9px; background: white; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+        th { background: #f8f9fa; }
+
+        .nav { height: 70px; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; background: white; position: absolute; bottom: 0; width: 100%; }
+        .nav-btn { color: #ccc; font-size: 11px; text-align: center; cursor: pointer; flex: 1; }
+        .nav-btn.active { color: var(--roxo); }
+
+        @media print {
+            body * { visibility: hidden; }
+            #report-screen, #report-screen * { visibility: visible; }
+            #report-screen { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <div id="home" class="tab-content tab-active">
+        <div class="header">
+            <i class="fas fa-heart-pulse"></i>
+            <h1>GlicoGabi</h1>
+            <p>Olá, Gabriela! Vamos cuidar da saúde?</p>
+        </div>
+        <div class="med-section">
+            <div class="med-card"><span>NPH</span><br><b id="v1">--</b></div>
+            <div class="med-card"><span>Regular</span><br><b id="v2">--</b></div>
+            <div class="med-card"><span>Metf.</span><br><b id="v3">--</b></div>
+        </div>
+        <div class="input-box">
+            <select id="momento">
+                <option value="Jejum">🌅 Jejum</option><option value="Pós-Café">☕ Pós-Café</option>
+                <option value="Antes Almoço">🥗 Antes Almoço</option><option value="Pós-Almoço">🍱 Pós-Almoço</option>
+                <option value="Antes Jantar">🍗 Antes Jantar</option><option value="Pós-Jantar">🍕 Pós-Jantar</option>
+            </select>
+            <input type="number" id="valor" placeholder="mg/dL">
+            <button class="btn-save" onclick="salvarGlicemia()">Salvar Registro</button>
+        </div>
+        <div id="lista-hoje"></div>
+    </div>
+
+    <div id="evolucao" class="tab-content">
+        <div class="header" style="padding:20px"><h1>Histórico</h1></div>
+        <div style="padding:15px"><button class="btn-save" onclick="addMarco()">+ Adicionar Marco</button></div>
+        <div id="lista-marcos"></div>
+    </div>
+
+    <div id="ajustes" class="tab-content">
+        <div class="header" style="padding:20px"><h1>Ajustes</h1></div>
+        <div class="config-group">
+            <button class="btn-save" style="background:#f39c12; margin-bottom:15px" onclick="ativarNotificacoes()">🔔 Ativar Lembretes no Celular</button>
+            
+            <span class="config-label">Doses Atuais:</span>
+            <div class="time-row"><input id="en" placeholder="NPH" oninput="sinc()"><input id="er" placeholder="Regular" oninput="sinc()"><input id="em" placeholder="Metf." oninput="sinc()"></div>
+            <div class="time-row"><input id="vn" placeholder="un" oninput="sinc()"><input id="vr" placeholder="un" oninput="sinc()"><input id="vm" placeholder="mg" oninput="sinc()"></div>
+            
+            <span class="config-label">Horários Insulina:</span>
+            <div class="time-row"><input type="time" class="h-lembrete" onchange="salvarLembretes()"><input type="time" class="h-lembrete" onchange="salvarLembretes()"><input type="time" class="h-lembrete" onchange="salvarLembretes()"></div>
+            <span class="config-label">Horários Remédios:</span>
+            <div class="time-row"><input type="time" class="h-lembrete" onchange="salvarLembretes()"><input type="time" class="h-lembrete" onchange="salvarLembretes()"><input type="time" class="h-lembrete" onchange="salvarLembretes()"></div>
+
+            <span class="config-label">Relatório do Mês:</span>
+            <select id="mes-filtro">
+                <option value="01">Janeiro</option><option value="02" selected>Fevereiro</option><option value="03">Março</option>
+                <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+
+            <button class="btn-save" style="background:var(--cinza); width:100%" onclick="visualizarRelatorio()">Visualizar Relatório na Tela</button>
+            
+            <input type="tel" id="tel-zap" placeholder="WhatsApp (Ex: 5511...)" style="margin-top:15px" onchange="salvarZapNum()">
+            <button class="btn-zap" onclick="enviarZap()"><i class="fab fa-whatsapp"></i> Enviar Mês p/ WhatsApp</button>
+        </div>
+    </div>
+
+    <div id="relatorio-fullscreen" class="tab-content" style="background:white; z-index:100;">
+        <div class="header" style="padding:15px"><h1>Relatório Detalhado</h1></div>
+        <div id="report-screen"></div>
+        <center>
+            <button class="btn-save" style="margin-top:10px" onclick="window.print()">Salvar como PDF</button>
+            <button class="btn-save" style="background:red; margin-top:10px" onclick="aba('ajustes', document.querySelectorAll('.nav-btn')[2])">Fechar</button>
+        </center>
+    </div>
+
+    <div class="nav">
+        <div class="nav-btn active" onclick="aba('home', this)"><i class="fas fa-home"></i><br>Home</div>
+        <div class="nav-btn" onclick="aba('evolucao', this)"><i class="fas fa-history"></i><br>Histórico</div>
+        <div class="nav-btn" onclick="aba('ajustes', this)"><i class="fas fa-cog"></i><br>Ajustes</div>
+    </div>
+</div>
+
+<script>
+    let registros = {}; let marcos = []; let lembretes = [];
+
+    window.onload = function() {
+        const d = localStorage.getItem('glicogabi-v35'); if(d) registros = JSON.parse(d);
+        const m = localStorage.getItem('glicogabi-marcos'); if(m) marcos = JSON.parse(m);
+        const l = localStorage.getItem('glicogabi-lembretes'); if(l) {
+            lembretes = JSON.parse(l);
+            const inputs = document.querySelectorAll('.h-lembrete');
+            lembretes.forEach((hora, i) => { if(inputs[i]) inputs[i].value = hora; });
+        }
+        const tz = localStorage.getItem('glicogabi-telzap'); if(tz) document.getElementById('tel-zap').value = tz;
+        ['en','er','em','vn','vr','vm'].forEach(id => {
+            const val = localStorage.getItem('glicogabi-'+id); if(val) document.getElementById(id).value = val;
+        });
+        sinc(); renderHome(); setInterval(verificarLembretes, 60000);
+    };
+
+    function salvarZapNum() { localStorage.setItem('glicogabi-telzap', document.getElementById('tel-zap').value); }
+    function ativarNotificacoes() { Notification.requestPermission(); }
+    function salvarLembretes() {
+        const inputs = document.querySelectorAll('.h-lembrete');
+        lembretes = Array.from(inputs).map(i => i.value);
+        localStorage.setItem('glicogabi-lembretes', JSON.stringify(lembretes));
+    }
+    function verificarLembretes() {
+        const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        if (lembretes.includes(agora)) {
+            new Notification("Hora da Medicação!", { body: "GlicoGabi: Verifique sua glicemia ou tome sua dose agora." });
+        }
+    }
+    function aba(id, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('tab-active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('tab-active');
+        el.classList.add('active');
+        if(id === 'evolucao') renderMarcos();
+    }
+    function sinc() {
+        const ids = ['en','er','em','vn','vr','vm'];
+        ids.forEach(id => localStorage.setItem('glicogabi-'+id, document.getElementById(id).value));
+        document.getElementById('v1').innerText = (document.getElementById('vn').value || "--") + "un";
+        document.getElementById('v2').innerText = (document.getElementById('vr').value || "--") + "un";
+        document.getElementById('v3').innerText = (document.getElementById('vm').value || "--") + "mg";
+    }
+
+    function salvarGlicemia() {
+        const v = parseInt(document.getElementById('valor').value);
+        const m = document.getElementById('momento').value;
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        const hora = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        if(!v) return;
+        if(!registros[hoje]) registros[hoje] = {};
+        
+        let cor = (v < 70 || v > 250) ? "#ff4d4d" : (v > 140 ? "#ffb142" : "#2ecc71");
+        let msg = "";
+        if(!registros[hoje][m]) {
+            if(v < 70) msg = "Hipoglicemia! Consumir 15g carbo rápido.";
+            else if(v > 180) msg = "Alta! Sugestão: +" + Math.round((v-120)/40) + "un Regular.";
+            else msg = "Glicemia Normal.";
+            registros[hoje][m] = { v, h: hora, c: cor, m: msg, evs: [] };
+        } else {
+            const ciclo = registros[hoje][m];
+            const ultV = ciclo.evs.length > 0 ? ciclo.evs[ciclo.evs.length-1].v : ciclo.v;
+            if(v < 70) msg = "Hipoglicemia! Consumir carbo rápido.";
+            else if(v >= 70 && v <= 140) msg = "Excelente! Valor dentro da meta.";
+            else if(v < ultV) msg = "Está baixando! Meça em 20 min.";
+            else msg = "Valor subiu! Reavaliar.";
+            ciclo.evs.push({ v, h: hora, c: cor, m: msg });
+        }
+        localStorage.setItem('glicogabi-v35', JSON.stringify(registros));
+        renderHome(); document.getElementById('valor').value = "";
+    }
+
+    function renderHome() {
+        const l = document.getElementById('lista-hoje'); l.innerHTML = "";
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        if(!registros[hoje]) return;
+        for(let m in registros[hoje]) {
+            let c = registros[hoje][m];
+            let evsHtml = c.evs.map((e, idx) => `<div class="ev-row"><div style="display:flex; justify-content:space-between"><span>└ ${e.h} - <b>${e.v} mg/dL</b></span><div><button class="btn-icon" onclick="editEv('${m}', ${idx})">✏️</button><button class="btn-icon" onclick="delEv('${m}', ${idx})">🗑️</button></div></div><span style="color:${e.c}">${e.m}</span></div>`).join('');
+            l.innerHTML += `<div class="card"><div class="actions-btn"><button class="btn-icon" onclick="editMed('${m}')">✏️</button><button class="btn-icon" onclick="delMed('${m}')">🗑️</button></div><b>${m}</b><br><small>${hoje} - ${c.h}</small><div class="val-num" style="color:${c.c}">${c.v}</div><small style="color:${c.c}; font-weight:bold">${c.m}</small>${evsHtml}</div>`;
+        }
+    }
+
+    function visualizarRelatorio() {
+        aba('relatorio-fullscreen', document.querySelectorAll('.nav-btn')[2]);
+        const screen = document.getElementById('report-screen');
+        const mesFiltro = document.getElementById('mes-filtro').value;
+        let html = `<table><tr><th>Data</th><th>Jejum</th><th>Café</th><th>Alm</th><th>P-Alm</th><th>Jant</th><th>P-Jant</th><th>Observações</th></tr>`;
+        
+        let temDados = false;
+        for(let data in registros) {
+            // Ajuste na detecção do mês: busca o mês dentro da string de data dd/mm/aaaa
+            if(data.split('/')[1] === mesFiltro) {
+                temDados = true;
+                let d = registros[data];
+                let obs = [];
+                for(let m in d) if(d[m].evs.length > 0) obs.push(`${m}: ${d[m].evs.map(e => e.v + 'mg(' + e.m + ')').join(' | ')}`);
+                html += `<tr><td>${data}</td><td>${d['Jejum']?.v || '-'}</td><td>${d['Pós-Café']?.v || '-'}</td><td>${d['Antes Almoço']?.v || '-'}</td><td>${d['Pós-Almoço']?.v || '-'}</td><td>${d['Antes Jantar']?.v || '-'}</td><td>${d['Pós-Jantar']?.v || '-'}</td><td style="text-align:left">${obs.join('; ')}</td></tr>`;
+            }
+        }
+        screen.innerHTML = temDados ? html + "</table>" : "<p style='text-align:center'>Nenhum dado encontrado para este mês.</p>";
+    }
+
+    function enviarZap() {
+        const tel = document.getElementById('tel-zap').value;
+        const mesFiltro = document.getElementById('mes-filtro').value;
+        if(!tel) return alert("Cadastre o WhatsApp!");
+        let txt = `*Relatório GlicoGabi - Mês ${mesFiltro}*\n\n`;
+        let temDados = false;
+        for(let d in registros) {
+            if(d.split('/')[1] === mesFiltro) {
+                temDados = true;
+                txt += `📅 *${d}*\n`;
+                for(let m in registros[d]) {
+                    txt += `*${m}:* ${registros[d][m].v}mg\n`;
+                    registros[d][m].evs.forEach(e => txt += `  └ ${e.h}: ${e.v}mg (${e.m})\n`);
+                }
+            }
+        }
+        if(!temDados) return alert("Sem dados para este mês!");
+        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(txt)}`);
+    }
+
+    function addMarco() {
+        const ano = prompt("Ano:"); const desc = prompt("Descrição:");
+        if(ano && desc) { marcos.push({data: ano, txt: desc}); localStorage.setItem('glicogabi-marcos', JSON.stringify(marcos)); renderMarcos(); }
+    }
+    function renderMarcos() {
+        const l = document.getElementById('lista-marcos'); l.innerHTML = "";
+        marcos.forEach((m, i) => {
+            l.innerHTML += `<div class="hist-card"><b>📌 ${m.data}</b><br><small>${m.txt}</small><div class="actions-btn"><button class="btn-icon" onclick="editMarco(${i})">✏️</button><button class="btn-icon" onclick="delMarco(${i})">🗑️</button></div></div>`;
+        });
+    }
+    function editEv(m, idx) { const nv = prompt("Novo valor:"); if(nv) { registros[new Date().toLocaleDateString('pt-BR')][m].evs[idx].v = parseInt(nv); renderHome(); } }
+    function delEv(m, idx) { if(confirm("Excluir?")) { registros[new Date().toLocaleDateString('pt-BR')][m].evs.splice(idx, 1); renderHome(); } }
+    function editMed(m) { const nv = prompt("Novo valor:"); if(nv) { registros[new Date().toLocaleDateString('pt-BR')][m].v = parseInt(nv); renderHome(); } }
+    function delMed(m) { if(confirm("Excluir?")) { delete registros[new Date().toLocaleDateString('pt-BR')][m]; renderHome(); } }
+    function editMarco(i) { const a = prompt("Ano:", marcos[i].data); const t = prompt("Texto:", marcos[i].txt); if(a && t) { marcos[i].data = a; marcos[i].txt = t; renderMarcos(); } }
+    function delMarco(i) { if(confirm("Excluir?")) { marcos.splice(i, 1); renderMarcos(); } }
+</script>
+</body>
+</html>
