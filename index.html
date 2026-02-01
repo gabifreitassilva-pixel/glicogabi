@@ -7,56 +7,48 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --primary: #7d5fff; --secondary: #fff; --bg: #f5f6fa; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; } /* Espaço para o menu flutuante */
-        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; } /* Espaço aumentado para o menu flutuante */
         .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .card { background: white; margin: 15px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
         input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:active { transform: scale(0.98); }
-        
+        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-alert { background: #ff9f43; margin-top: 20px; }
-        .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        
-        /* MENU FLUTUANTE */
+        .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+        /* MUDANÇA: MENU AGORA É FLUTUANTE */
         .nav { 
             position: fixed; 
-            bottom: 20px; /* Distância do fundo */
+            bottom: 20px; 
             left: 50%;
             transform: translateX(-50%);
-            width: 90%; /* Largura do menu */
+            width: 90%;
             max-width: 400px;
-            background: rgba(255, 255, 255, 0.95); 
+            background: white; 
             display: flex; 
             justify-content: space-around; 
             padding: 12px 0; 
-            border-radius: 30px; /* Bordas bem arredondadas */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-            backdrop-filter: blur(10px); /* Efeito de vidro */
-            z-index: 999;
+            border-radius: 30px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
         }
-        
-        .nav-item { text-decoration: none; color: #666; font-size: 12px; text-align: center; flex: 1; transition: 0.3s; }
-        .nav-item b { display: block; font-size: 18px; margin-bottom: 2px; }
-        .active { color: var(--primary); transform: translateY(-5px); }
-        
-        .tab-content { display: none; animation: fadeIn 0.3s; }
+
+        .nav-item { text-decoration: none; color: #666; font-size: 12px; text-align: center; flex: 1; }
+        .active { color: var(--primary); font-weight: bold; }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h1>GlicoGabi</h1>
-    <p>Saúde na palma da mão ✨</p>
+    <p>Sua saúde em dia ✨</p>
 </div>
 
 <div id="registro" class="tab-content active">
     <div class="card">
         <h3>Nova Medição</h3>
-        <input type="number" id="valorGlicemia" placeholder="Valor (mg/dL)" inputmode="numeric">
+        <input type="number" id="valorGlicemia" placeholder="Valor (mg/dL)">
         <select id="periodo">
             <option value="Jejum">Jejum</option>
             <option value="Pré-Prandial">Pré-Almoço</option>
@@ -77,28 +69,31 @@
 
 <div id="ajustes" class="tab-content">
     <div class="card">
-        <h3>🔔 Lembretes Diários</h3>
+        <h3>🔔 Configurar Lembretes</h3>
+        <p style="font-size: 12px; color: #666;">Coloque o horário para repetir todos os dias:</p>
         <input type="time" id="horaInsulina">
-        <button onclick="salvarLembrete()">Definir Horário</button>
-        <button class="btn-alert" onclick="pedirPermissao()">🔔 Ativar Notificações</button>
-        <p id="statusSW" style="font-size: 11px; text-align: center; color: #7d5fff; margin-top: 10px;">Sistema flutuante ativo ✅</p>
+        <button onclick="salvarLembrete()">Salvar Horário Diário</button>
+        <button class="btn-alert" onclick="pedirPermissao()">🔔 Ativar Lembretes no Celular</button>
+        <hr>
+        <p id="statusSW" style="font-size: 11px; text-align: center; color: green;">Sistema de Lembretes Ativo ✅</p>
     </div>
 </div>
 
 <nav class="nav">
-    <a href="#" class="nav-item active" onclick="mudarAba('registro')"><b>➕</b>Medir</a>
-    <a href="#" class="nav-item" onclick="mudarAba('historico')"><b>📜</b>Histórico</a>
-    <a href="#" class="nav-item" onclick="mudarAba('ajustes')"><b>⚙️</b>Ajustes</a>
+    <a href="#" class="nav-item active" onclick="mudarAba('registro')">➕ Medir</a>
+    <a href="#" class="nav-item" onclick="mudarAba('historico')">📜 Histórico</a>
+    <a href="#" class="nav-item" onclick="mudarAba('ajustes')">⚙️ Ajustes</a>
 </nav>
 
 <script>
     let medicoes = JSON.parse(localStorage.getItem('medicoes')) || [];
     let lembretes = JSON.parse(localStorage.getItem('lembretes')) || [];
 
+    // REGISTRO DE SERVICE WORKER
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-            console.log("SW registrado");
-        });
+        navigator.serviceWorker.register('sw.js')
+        .then(() => console.log("SW Ativo"))
+        .catch(() => document.getElementById('statusSW').innerText = "Erro ao ativar lembretes ❌");
     }
 
     function mudarAba(id) {
@@ -112,24 +107,26 @@
     function salvarMedicao() {
         const valor = document.getElementById('valorGlicemia').value;
         const periodo = document.getElementById('periodo').value;
+        const data = new Date().toLocaleString('pt-BR');
         if(!valor) return alert("Digite um valor!");
-        medicoes.unshift({ valor, periodo, data: new Date().toLocaleString('pt-BR') });
+        medicoes.unshift({ valor, periodo, data });
         localStorage.setItem('medicoes', JSON.stringify(medicoes));
-        alert("Medida salva!");
+        alert("Salvo com sucesso!");
         document.getElementById('valorGlicemia').value = '';
     }
 
     function atualizarHistorico() {
-        document.getElementById('listaHistorico').innerHTML = medicoes.map(m => `
+        const lista = document.getElementById('listaHistorico');
+        lista.innerHTML = medicoes.map(m => `
             <div class="history-item">
-                <span><strong>${m.valor}</strong> mg/dL</span>
-                <span style="color: #888; font-size: 11px;">${m.data}</span>
+                <span><strong>${m.valor}</strong> mg/dL (${m.periodo})</span>
+                <span style="color: #888;">${m.data}</span>
             </div>
         `).join('');
     }
 
     function limparHistorico() {
-        if(confirm("Apagar tudo?")) {
+        if(confirm("Deseja apagar tudo?")) {
             medicoes = [];
             localStorage.removeItem('medicoes');
             atualizarHistorico();
@@ -138,7 +135,8 @@
 
     function pedirPermissao() {
         Notification.requestPermission().then(perm => {
-            if (perm === "granted") alert("Notificações liberadas!");
+            if (perm === "granted") alert("Ótimo! Agora eu posso te avisar.");
+            else alert("Você precisa permitir as notificações nas configurações do celular.");
         });
     }
 
@@ -149,27 +147,25 @@
             lembretes.push(hora);
             localStorage.setItem('lembretes', JSON.stringify(lembretes));
         }
-        
-        // Tenta enviar para o Service Worker
-        if (navigator.serviceWorker.controller) {
-            const [h, m] = hora.split(':');
-            navigator.serviceWorker.controller.postMessage({
-                type: 'SET_REMINDER',
-                hora: h,
-                minuto: m
-            });
-        }
-        alert("Lembrete configurado para " + hora);
+        alert("Lembrete diário salvo para às " + hora);
     }
 
+    // VERIFICAÇÃO DE LEMBRETES (SUPER ALERTA)
     function verificarLembretes() {
         const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
         if (lembretes.includes(agora)) {
             if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
-            alert("🚨 HORA DA MEDICAÇÃO!\nVerifique sua glicemia agora.");
+            if (Notification.permission === "granted") {
+                new Notification("🚨 HORA DA MEDICAÇÃO!", { 
+                    body: "GlicoGabi: Verifique sua glicemia ou tome sua dose agora.",
+                    icon: "icone.png"
+                });
+            }
+            alert("🚨 HORA DA MEDICAÇÃO!\n\nVerifique sua glicemia ou tome sua dose agora.");
         }
     }
-    setInterval(verificarLembretes, 30000);
+    setInterval(verificarLembretes, 30000); 
 </script>
+
 </body>
 </html>
