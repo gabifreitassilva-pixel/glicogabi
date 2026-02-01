@@ -7,31 +7,14 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --primary: #7d5fff; --secondary: #fff; --bg: #f5f6fa; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; } /* Espaço aumentado para o menu flutuante */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 70px; }
         .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .card { background: white; margin: 15px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-alert { background: #ff9f43; margin-top: 20px; }
         .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
-
-        /* MUDANÇA: MENU AGORA É FLUTUANTE */
-        .nav { 
-            position: fixed; 
-            bottom: 20px; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: white; 
-            display: flex; 
-            justify-content: space-around; 
-            padding: 12px 0; 
-            border-radius: 30px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            z-index: 1000;
-        }
-
+        .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
         .nav-item { text-decoration: none; color: #666; font-size: 12px; text-align: center; flex: 1; }
         .active { color: var(--primary); font-weight: bold; }
         .tab-content { display: none; }
@@ -154,17 +137,22 @@
     function verificarLembretes() {
         const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
         if (lembretes.includes(agora)) {
+            // Vibração
             if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+            
+            // Notificação do Sistema
             if (Notification.permission === "granted") {
                 new Notification("🚨 HORA DA MEDICAÇÃO!", { 
                     body: "GlicoGabi: Verifique sua glicemia ou tome sua dose agora.",
                     icon: "icone.png"
                 });
             }
+            
+            // Alerta Visual (Pula na frente de tudo)
             alert("🚨 HORA DA MEDICAÇÃO!\n\nVerifique sua glicemia ou tome sua dose agora.");
         }
     }
-    setInterval(verificarLembretes, 30000); 
+    setInterval(verificarLembretes, 30000); // Checa a cada 30 segundos
 </script>
 
 </body>
