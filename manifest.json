@@ -1,0 +1,15 @@
+{
+  "name": "Cozinha de Lavanda",
+  "short_name": "Lavanda",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f3f0ff",
+  "theme_color": "#a29bfe",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3448/3448099.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
